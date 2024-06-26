@@ -17,8 +17,7 @@
       F
       end
       D[minipc] --> minipc
-      
-
+```
 # Kafka-Setup
 This project demonstrates how to use Apache Kafka to stream video frames from an edge device to a central server. The edge device captures images from a camera, processes them, and sends them to a Kafka server. The central server consumes these video frames, processes them using the Google Cloud Vision API, and displays the annotated frames.
 ## Prerequisite
