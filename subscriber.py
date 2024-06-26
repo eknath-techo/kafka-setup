@@ -17,7 +17,7 @@ def main():
     """
     bootstrap_servers = "192.168.20.190:9092"
     group_id = "kafka-python-consumer"
-    topic = "test"
+    topic = "img"
     central_server = CentralServer(bootstrap_servers, group_id, topic)
     central_server.listen()
 

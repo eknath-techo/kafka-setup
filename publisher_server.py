@@ -82,5 +82,6 @@ class EdgeDevice():
             >>> edge_device.send_to_server(frame)
         """
         data = pickle.dumps(frame)
+        print("Frame send to kafka server")
         self.producer.produce(self.topic, key='camera_frame', value=data, callback=self.acked)
         self.producer.flush()
