@@ -15,7 +15,7 @@ def main():
     Initializes a CentralServer instance with the specified bootstrap servers, group ID, and topic,
     and starts listening for incoming messages.
     """
-    bootstrap_servers = "192.168.20.86:9092"
+    bootstrap_servers = "192.168.20.190:9092"
     group_id = "kafka-python-consumer"
     topic = "test"
     central_server = CentralServer(bootstrap_servers, group_id, topic)
