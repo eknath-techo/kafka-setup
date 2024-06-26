@@ -1,0 +1,72 @@
+- hosts: minipc2
+  become: yes
+  vars:
+      repo_url: https://github.com/eknath-techo/kafka-setup.git
+      repo_location: /home/tech/kafka_setup
+  tasks:
+    - name: Clone project code.
+      git:
+        repo: "{{ repo_url }}"
+        dest: "{{ repo_location }}"
+        update: yes
+    - name: installing packages for python env
+      become: yes
+      apt:
+          name: 
+            - python3-pip
+            - python3-dev
+            - build-essential
+            - libssl-dev
+            - libffi-dev
+            - python3-setuptools
+            - python3-venv
+          update_cache: yes
+
+    - name: Install virtualenv via pip
+      become: yes
+      pip:
+        name: virtualenv
+        executable: pip3
+
+    - name: Create virtual environment
+      ansible.builtin.command:
+        cmd: python3 -m venv /home/tech/kafka_setup/venv 
+
+    - name: Install requirements
+      pip: 
+        requirements=/home/tech/kafka_setup/requirements.txt 
+        virtualenv=/home/tech/kafka_setup/venv 
+        virtualenv_python=python3
+
+    - name: Install supervisord
+      apt:
+        name: supervisor
+        state: present
+        update_cache: yes
+
+    - name: Create Supervisor configuration directory
+      file:
+        path: /etc/supervisor/conf.d/
+        state: directory
+        mode: '0755'
+
+    - name: Copy Supervisor configuration file for test.py
+      copy:
+        src: files/producer.conf
+        dest: /etc/supervisor/conf.d/producer.conf
+        mode: '0644'
+
+    - name: Reload Supervisor to apply new configuration
+      command: supervisorctl reread
+
+    - name: Update Supervisor with new configuration
+      command: supervisorctl update
+
+    - name: Ensure Supervisor is running
+      service:
+        name: supervisor
+        state: started
+        enabled: yes
+
+    - name: Start producer.py using Supervisor
+      command: supervisorctl start producer_from_local
