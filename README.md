@@ -1,22 +1,22 @@
 # Architecture
 ```mermaid
-graph TD
-    A[Ansible Host] --> |starts| B[Supervisor]
-    B --> |invokes| C[Publisher Python Script]
-    C --> |sends frames| E[Kafka Server]
-    F[Subscriber] --> |receive frames| E
-    
-    subgraph minipc[minipc]
-    B
-    C
-    end
-    subgraph local_machine_1[local machine]
-    A
-    end
-    subgraph local_machine_2[local machine]
-    F
-    end
-    D[minipc] --> minipc
+  graph TD
+      A[Ansible Host] --> |starts| B[Supervisor]
+      B --> |invokes| C[Publisher Python Script]
+      C --> |sends frames| E[Kafka Server]
+      F[Subscriber] --> |receive frames| E
+      
+      subgraph minipc[minipc]
+      B
+      C
+      end
+      subgraph local_machine_1[local machine]
+      A
+      end
+      subgraph local_machine_2[local machine]
+      F
+      end
+      D[minipc] --> minipc
 
 # Kafka-Setup
 This project demonstrates how to use Apache Kafka to stream video frames from an edge device to a central server. The edge device captures images from a camera, processes them, and sends them to a Kafka server. The central server consumes these video frames, processes them using the Google Cloud Vision API, and displays the annotated frames.
