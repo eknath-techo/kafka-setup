@@ -34,7 +34,7 @@ class EdgeDevice():
         """
         self.producer = Producer({'bootstrap.servers': bootstrap_servers})
         self.topic = topic
-        self.cap = cv2.VideoCapture(1)
+        self.cap = cv2.VideoCapture(0)
 
     def acked(self, err, msg):
         """
