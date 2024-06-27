@@ -34,7 +34,7 @@ class EdgeDevice():
         """
         self.producer = Producer({'bootstrap.servers': bootstrap_servers})
         self.topic = topic
-        self.cap = cv2.VideoCapture(1)
+        self.cap = cv2.VideoCapture(0)
 
     def acked(self, err, msg):
         """
@@ -61,13 +61,6 @@ class EdgeDevice():
                 current_time = datetime.datetime.now().strftime("%Y-%m-%d_%H-%M-%S")
                 cv2.putText(frame, current_time, (10, 30), cv2.FONT_HERSHEY_SIMPLEX, 0.7, (255, 255, 255), 2, cv2.LINE_AA)
                 self.send_to_server(frame)
-                # cv2.imshow('Edge Device', frame)
-                # if cv2.waitKey(1) & 0xFF == ord('q'):
-                #     break
-            else:
-                print("Failed to capture frame")
-        # self.cap.release()
-        # cv2.destroyAllWindows()
 
     def send_to_server(self, frame):
         """
