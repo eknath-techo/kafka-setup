@@ -11,6 +11,7 @@ Classes:
 
 import pickle
 import cv2
+import datetime
 from confluent_kafka import Consumer, KafkaError
 
 class CentralServer:
@@ -48,6 +49,11 @@ class CentralServer:
         None
         """
         frame = pickle.loads(data)
+        timestamp = datetime.datetime.now().strftime("%Y%m%d_%H%M%S")
+        filename = f"images/img_{timestamp}.jpg"
+        cv2.imwrite(filename, frame)
+
+
         cv2.imshow('Central Server', frame)
         if cv2.waitKey(1) & 0xFF == ord('q'):
             self.running = False

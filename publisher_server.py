@@ -24,7 +24,7 @@ class EdgeDevice():
     topic (str): The topic to produce messages to.
     cap (VideoCapture): The OpenCV video capture instance.
     """
-    def __init__(self, bootstrap_servers, topic):
+    def __init__(self, bootstrap_servers, topic, camera_id):
         """
         Initialize the EdgeDevice instance.
 
@@ -34,7 +34,7 @@ class EdgeDevice():
         """
         self.producer = Producer({'bootstrap.servers': bootstrap_servers})
         self.topic = topic
-        self.cap = cv2.VideoCapture(0)
+        self.cap = cv2.VideoCapture(camera_id)
 
     def acked(self, err, msg):
         """
