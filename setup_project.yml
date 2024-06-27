@@ -1,42 +1,55 @@
 - hosts: minipc2
   become: yes
   vars:
-      repo_url: https://github.com/eknath-techo/kafka-setup.git
-      repo_location: /home/tech/kafka_setup
+    repo_url: https://github.com/eknath-techo/kafka_setup.git
+    user: "tech"
+    repo_location: "/home/{{ user  }}/kafka_setup"
+    venv_location: "{{ repo_location }}/venv"
+    supervisor_conf_file: producer.conf
   tasks:
+    - name: Print HOME environment variable
+      debug:
+        msg: "Home directory is {{ repo_location }}"
+
     - name: Clone project code.
       git:
         repo: "{{ repo_url }}"
         dest: "{{ repo_location }}"
         update: yes
+
+    - name: Set 777 permissions for all files in the cloned directory.
+      file:
+        path: "{{ repo_location }}"
+        state: directory
+        recurse: yes
+        mode: '0777'
+
     - name: installing packages for python env
-      become: yes
       apt:
-          name: 
-            - python3-pip
-            - python3-dev
-            - build-essential
-            - libssl-dev
-            - libffi-dev
-            - python3-setuptools
-            - python3-venv
-          update_cache: yes
+        name: 
+          - python3-pip
+          - python3-dev
+          - build-essential
+          - libssl-dev
+          - libffi-dev
+          - python3-setuptools
+          - python3-venv
+        update_cache: yes
 
     - name: Install virtualenv via pip
-      become: yes
       pip:
         name: virtualenv
         executable: pip3
 
     - name: Create virtual environment
       ansible.builtin.command:
-        cmd: python3 -m venv /home/tech/kafka_setup/venv 
-
+        cmd: python3 -m venv "{{ venv_location }}"
+   
     - name: Install requirements
       pip: 
-        requirements=/home/tech/kafka_setup/requirements.txt 
-        virtualenv=/home/tech/kafka_setup/venv 
-        virtualenv_python=python3
+        requirements: "{{ repo_location }}/requirements.txt"
+        virtualenv: "{{ venv_location }}"
+        virtualenv_python: python3
 
     - name: Install supervisord
       apt:
@@ -52,9 +65,9 @@
 
     - name: Copy Supervisor configuration file for test.py
       copy:
-        src: files/producer.conf
-        dest: /etc/supervisor/conf.d/producer.conf
-        mode: '0644'
+            src: "files/{{ supervisor_conf_file }}"
+            dest: "/etc/supervisor/conf.d/{{ supervisor_conf_file }}"
+            mode: '0644'
 
     - name: Reload Supervisor to apply new configuration
       command: supervisorctl reread
