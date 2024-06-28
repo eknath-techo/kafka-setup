@@ -1,0 +1,68 @@
+- hosts: minipc2_2
+  become: true
+  vars:
+    docker_compose_file: docker-compose.yml
+
+  tasks:
+    - name: Display ansible_system and ansible_architecture
+      ansible.builtin.debug:
+        msg: "System: {{ ansible_system }}, Architecture: {{ ansible_architecture }}"
+
+    - name: Download Docker Compose
+      ansible.builtin.get_url:
+        url: "https://github.com/docker/compose/releases/download/v2.18.1/docker-compose-{{ ansible_system }}-{{ ansible_architecture }}"
+        dest: /usr/local/bin/docker-compose
+        mode: '0755'
+      register: download_result
+
+    - name: Make Docker Compose executable
+      ansible.builtin.file:
+        path: /usr/local/bin/docker-compose
+        mode: '0755'
+      when: download_result is changed
+
+    - name: Copy docker-compose.yml file
+      copy:
+        content: |
+          version: '3.7'
+
+          services:
+            zookeeper:
+              image: zookeeper
+              container_name: zookeeper
+              ports:
+                - "2181:2181"
+              networks:
+                - kafka-net
+
+            kafka:
+              image: confluentinc/cp-kafka
+              container_name: kafka
+              depends_on:
+                - zookeeper
+              ports:
+                - "9092:9092"
+              environment:
+                KAFKA_ZOOKEEPER_CONNECT: zookeeper:2181
+                KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://192.168.20.190:9092
+                KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: PLAINTEXT:PLAINTEXT
+                KAFKA_INTER_BROKER_LISTENER_NAME: PLAINTEXT
+                KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
+                KAFKA_LISTENERS: PLAINTEXT://0.0.0.0:9092
+              networks:
+                - kafka-net
+
+          networks:
+            kafka-net:
+              driver: bridge
+        dest: "/home/provision/docker-compose.yml"
+
+    - name: Deploy Docker Compose stack
+      command: /usr/local/bin/docker-compose -f /home/provision/docker-compose.yml up -d
+      args:
+        chdir: /home/provision
+
+    - name: Ensure Docker Compose services are started
+      command: /usr/local/bin/docker-compose -f /home/provision/docker-compose.yml start zookeeper kafka
+      args:
+        chdir: /home/provision
