@@ -60,6 +60,9 @@ class EdgeDevice():
             if ret:
                 current_time = datetime.datetime.now().strftime("%Y-%m-%d_%H-%M-%S")
                 cv2.putText(frame, current_time, (10, 30), cv2.FONT_HERSHEY_SIMPLEX, 0.7, (255, 255, 255), 2, cv2.LINE_AA)
+                cv2.imshow("producer" , frame)
+                if cv2.waitKey(1) & 0xFF == ord('q'):
+                    cv2.destroyAllWindows()
                 self.send_to_server(frame)
 
     def send_to_server(self, frame):
@@ -74,6 +77,7 @@ class EdgeDevice():
             >>> frame = cv2.imread("image.jpg")
             >>> edge_device.send_to_server(frame)
         """
+        print(type(frame))
         data = pickle.dumps(frame)
         print("Frame send to kafka server")
         self.producer.produce(self.topic, key='camera_frame', value=data, callback=self.acked)

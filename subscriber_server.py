@@ -1,14 +1,3 @@
-"""
-central_server.py
-
-A module that provides a central server for consuming video frames from a Kafka topic, 
-processing them using Google Cloud Vision API, and displaying the annotated frames.
-
-Classes:
-    CentralServer: A central server that consumes video frames from a Kafka topic, 
-    processes them using Google Cloud Vision API, and displays the annotated frames.
-"""
-
 import pickle
 import cv2
 import datetime
@@ -37,6 +26,8 @@ class CentralServer:
         self.topic = topic
         self.consumer.subscribe([self.topic])
         self.running = True
+        self.start_time = datetime.datetime.now()
+        self.frame_count = 0
 
     def update(self, data):
         """
@@ -49,11 +40,21 @@ class CentralServer:
         None
         """
         frame = pickle.loads(data)
-        timestamp = datetime.datetime.now().strftime("%Y%m%d_%H%M%S")
-        filename = f"images/img_{timestamp}.jpg"
-        cv2.imwrite(filename, frame)
+        self.frame_count += 1
 
+        # Calculate elapsed time
+        current_time = datetime.datetime.now()
+        elapsed_time = (current_time - self.start_time).total_seconds()
 
+        # Calculate FPS
+        if elapsed_time > 0:
+            fps = self.frame_count / elapsed_time
+        else:
+            fps = 0
+        
+        print(f"FPS: {fps:.2f}")
+
+        # Display the frame
         cv2.imshow('Central Server', frame)
         if cv2.waitKey(1) & 0xFF == ord('q'):
             self.running = False
@@ -83,3 +84,8 @@ class CentralServer:
             print(f"Error in listen loop: {e}")
         finally:
             self.consumer.close()
+
+# Example usage:
+if __name__ == "__main__":
+    central_server = CentralServer("localhost:9092", "my_group", "my_topic")
+    central_server.listen()
