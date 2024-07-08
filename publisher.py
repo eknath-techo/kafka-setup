@@ -13,7 +13,7 @@ def main():
     This function creates an instance of EdgeDevice, which captures and 
     processes images, and sends them to a Kafka topic.
     """
-    bootstrap_servers = "192.168.20.87:9092"          
+    bootstrap_servers = "192.168.20.190:9092"          
     topic = "images"                                     
     camera_id = 0
     edge_device = EdgeDevice(bootstrap_servers, topic, camera_id=camera_id)
