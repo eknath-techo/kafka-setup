@@ -8,6 +8,7 @@ import pickle
 import datetime
 import cv2
 from confluent_kafka import Producer
+from datetime import datetime
 
 class EdgeDevice():
     """ 
@@ -47,7 +48,8 @@ class EdgeDevice():
         if err is not None:
             print(f"Failed to deliver message: {str(msg)}: {str(err)}" )
         else:
-            print(f"Message produced to: {msg.topic()} {[ msg.partition()]}")
+            # print(f"Message produced to: {msg.topic()} {[ msg.partition()]}")
+            pass 
 
     def capture_and_process(self):
         """
@@ -77,8 +79,8 @@ class EdgeDevice():
             >>> frame = cv2.imread("image.jpg")
             >>> edge_device.send_to_server(frame)
         """
-        print(type(frame))
         data = pickle.dumps(frame)
-        print("Frame send to kafka server")
+        current_time = datetime.now().strftime("%H:%M:%S")
+        print(f"Frame send to kafka server at {current_time}")
         self.producer.produce(self.topic, key='camera_frame', value=data, callback=self.acked)
         self.producer.flush()
