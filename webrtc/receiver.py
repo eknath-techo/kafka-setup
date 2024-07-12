@@ -4,6 +4,7 @@ import numpy as np
 from aiortc import RTCPeerConnection, RTCSessionDescription, MediaStreamTrack
 from aiortc.contrib.signaling import TcpSocketSignaling
 from av import VideoFrame
+from datetime import datetime, timedelta
 
 class VideoReceiver:
     def __init__(self):
@@ -11,7 +12,7 @@ class VideoReceiver:
 
     async def handle_track(self, track):
         print("Inside handle track")
-        self.track = track   # Store the received track
+        self.track = track
         frame_count = 0
         while True:
             try:
@@ -21,8 +22,8 @@ class VideoReceiver:
                 print(f"Received frame {frame_count}")
                 
                 if isinstance(frame, VideoFrame):
-                    print(f"Frame type: VideoFrame, pts: {frame.pts}, time_base: {frame.time_base}")  # Print VideoFrame details
-                    frame = frame.to_ndarray(format="bgr24")   # Convert VideoFrame to numpy array (BGR format)
+                    print(f"Frame type: VideoFrame, pts: {frame.pts}, time_base: {frame.time_base}")
+                    frame = frame.to_ndarray(format="bgr24")
                 elif isinstance(frame, np.ndarray):
                     print(f"Frame type: numpy array")
                 else:
@@ -31,15 +32,23 @@ class VideoReceiver:
                 
                 # print(f"Frame shape: {frame.shape}")
                 
-                # cv2.imwrite(f"imgs/received_frame_{frame_count}.jpg", frame)
-                # print(f"Saved frame {frame_count} to file")
-                # cv2.imshow("Frame", frame)
+                 # Add timestamp to the frame
+                current_time = datetime.now()
+                new_time = current_time - timedelta( seconds=55)
+                timestamp = new_time.strftime("%Y-%m-%d %H:%M:%S.%f")[:-3]
+                # timestamp = datetime.now().strftime("%Y-%m-%d %H:%M:%S.%f")[:-3]  # Current time with milliseconds
+                # cv2.putText(frame, ti/mestamp, (frame.shape[1] - 300, frame.shape[0] - 30), cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 255, 0), 2, cv2.LINE_AA)
+                cv2.putText(frame, timestamp, (10, frame.shape[0] - 30), cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 255, 0), 2, cv2.LINE_AA)
+
+                cv2.imwrite(f"imgs/received_frame_{frame_count}.jpg", frame)
+                print(f"Saved frame {frame_count} to file")
+                cv2.imshow("Frame", frame)
     
                 # Exit on 'q' key press
                 if cv2.waitKey(1) & 0xFF == ord('q'):
                     break
-                if frame_count >= 300:
-                    break
+                # if frame_count >= 300:
+                #     break
             except asyncio.TimeoutError:
                 print("Timeout waiting for frame, continuing...")
             except Exception as e:
@@ -54,7 +63,7 @@ async def run(pc, signaling):
     def on_track(track):
         if isinstance(track, MediaStreamTrack):
             print(f"Receiving {track.kind} track")
-            asyncio.ensure_future(video_receiver.handle_track(track))  # Handle incoming track asynchronously
+            asyncio.ensure_future(video_receiver.handle_track(track))
 
     @pc.on("datachannel")
     def on_datachannel(channel):
@@ -85,7 +94,7 @@ async def run(pc, signaling):
         await asyncio.sleep(0.1)
 
     print("Connection established, waiting for frames...")
-    await asyncio.sleep(35)  # Wait for 35 seconds to receive frames
+    await asyncio.sleep(100)  # Wait for 35 seconds to receive frames
 
     print("Closing connection")
 
