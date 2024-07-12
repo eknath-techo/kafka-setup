@@ -74,7 +74,7 @@ python publisher.py
 bootstrap_servers = "192.168.20.86:9092"
 group_id = "kafka-python-consumer"
 topic = "img"
-
+```
 
 8.Run the Central Server Script
 - Start the central server script to listen for incoming messages from the Kafka topic and process the frames:
